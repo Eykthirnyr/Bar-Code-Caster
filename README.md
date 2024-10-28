@@ -70,12 +70,21 @@ A Python application that hosts a web server for continuous barcode scanning usi
 
 ---
 
-## Screenshots
+## Screenshot - Application GUI
 
-1. **Application GUI**: ![GUI](assets/app.png)
-2. **CSV Formatting**: ![GUI](assets/data_csv.png)
-3. **Mobile Scanning Page**: ![Mobile Scanner IOS](assets/ios.jpg)
-4. **Mobile Scanning Page**: ![Mobile Scanner ANDROID](assets/android.jpg)
+![GUI](assets/app.png)
+
+## Screenshot - CSV Formatting
+
+![GUI](assets/data_csv.png)
+
+## Screenshot - Mobile Scanning Page IOS
+
+![Mobile Scanner IOS](assets/ios.jpg)
+
+## Screenshot - Mobile Scanning Page ANDROID
+
+![Mobile Scanner ANDROID](assets/android.jpg)
 
 *Images are located in the `assets` folder for this README.*
 
