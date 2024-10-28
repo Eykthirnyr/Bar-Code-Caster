@@ -11,8 +11,7 @@ A Python application that hosts a web server for continuous barcode scanning usi
 - **Real-Time Statistics in GUI**: Displays total scans, last scanned code and format, server status, and connected users.
 - **Self-Signed SSL**: Secure HTTPS connection generated on first use.
 - **QR Code Access**: Easily access the server address via QR code displayed in the GUI.
-- **User-Friendly GUI**: Tkinter-based GUI with QR code, SSL information, "Made by Clément GHANEME" button, and a disclaimer.
-
+- **User-Friendly GUI**: Tkinter-based GUI with QR code, SSL information.
 ---
 
 ## Installation
