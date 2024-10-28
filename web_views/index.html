@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Barcode Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        #interactive.viewport {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            overflow: hidden;
+            text-align: center;
+        }
+        #interactive.viewport video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #result {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #toggleFlash {
+            margin-top: 10px;
+            padding: 15px 30px;
+            font-size: 18px;
+            width: 90%;
+            max-width: 400px;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+        }
+        h1 {
+            margin-top: 10px;
+        }
+        #footer {
+            margin: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+        #footer button {
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+        #disclaimer {
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 0 10px;
+            text-align: center;
+        }
+    </style>
+    <!-- Include QuaggaJS from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script>
+        var cooldownTime = {{ cooldown_time }};
+    </script>
+</head>
+<body>
+    <div id="container">
+        <h1>Scan Barcode</h1>
+        <div id="interactive" class="viewport"></div>
+        <div id="result"></div>
+        <button id="toggleFlash">Toggle Flashlight</button>
+        <div id="footer">
+            <button id="madeByButton">Made by Clément GHANEME</button>
+        </div>
+        <div id="disclaimer">
+            The software is provided "as is" and I am not responsible for its usage or any issues arising from using it.
+        </div>
+    </div>
+    <script>
+        var flashOn = false;
+        var lastScannedCode = null;
+        var lastScannedTime = 0;
+        var cooldownTimeMs = cooldownTime * 1000;
+
+        // Initialize QuaggaJS
+        Quagga.init({
+            inputStream : {
+                name : "Live",
+                type : "LiveStream",
+                constraints: {
+                    facingMode: "environment", // Use rear camera
+                    torch: false
+                },
+                target: document.querySelector('#interactive') // Define the video container
+            },
+            locator: {
+                patchSize: "medium",
+                halfSample: true
+            },
+            numOfWorkers: navigator.hardwareConcurrency || 4,
+            frequency: 10,
+            decoder : {
+                readers : [
+                    "code_128_reader",
+                    "ean_reader",
+                    "ean_8_reader",
+                    "code_39_reader",
+                    "upc_reader",
+                    "upc_e_reader",
+                    "codabar_reader",
+                    "i2of5_reader",
+                    "2of5_reader",
+                    "code_93_reader"
+                ]
+            },
+            locate: true
+        }, function(err) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log("Initialization finished. Ready to start");
+            Quagga.start();
+        });
+
+        Quagga.onDetected(function(result) {
+            var code = result.codeResult.code;
+            var format = result.codeResult.format;
+
+            var currentTime = new Date().getTime();
+
+            // Check if code is the same as last scanned and within cooldown time
+            if (code === lastScannedCode && (currentTime - lastScannedTime) < cooldownTimeMs) {
+                return; // Skip this detection
+            }
+
+            lastScannedCode = code;
+            lastScannedTime = currentTime;
+
+            console.log("Barcode detected and processed : [" + code + "]", result);
+
+            // Display scanned code and format
+            document.getElementById('result').innerHTML = "Scanned Code: " + code + "<br>Format: " + format;
+
+            // Send barcode data to server
+            fetch('/scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({barcode: code, format: format})
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Clear the result after cooldown
+                    setTimeout(function() {
+                        // Only clear the result if the cooldown has passed
+                        if ((new Date().getTime() - lastScannedTime) >= cooldownTimeMs) {
+                            document.getElementById('result').innerHTML = "";
+                        }
+                    }, cooldownTimeMs);
+                } else {
+                    document.getElementById('result').innerHTML = "Failed to send barcode.";
+                }
+            });
+        });
+
+        // Send a keep-alive ping to the server every 30 seconds
+        setInterval(function() {
+            fetch('/keepalive', {
+                method: 'POST'
+            });
+        }, 30000);
+
+        // When the user navigates away, send a disconnect message
+        window.addEventListener('beforeunload', function() {
+            navigator.sendBeacon('/disconnect');
+        });
+
+        // Flashlight control
+        document.getElementById('toggleFlash').addEventListener('click', function() {
+            var track = Quagga.CameraAccess.getActiveTrack();
+            if (track && track.getCapabilities) {
+                var capabilities = track.getCapabilities();
+                if (capabilities.torch) {
+                    flashOn = !flashOn;
+                    track.applyConstraints({
+                        advanced: [{ torch: flashOn }]
+                    }).catch(function(error) {
+                        console.log("Error applying constraints:", error);
+                        alert("Unable to toggle flashlight.");
+                    });
+                } else {
+                    alert("Flashlight is not supported on this device.");
+                }
+            } else {
+                alert("Flashlight control is not available.");
+            }
+        });
+
+        // "Made by Clément GHANEME" button
+        document.getElementById('madeByButton').addEventListener('click', function() {
+            window.open('https://clement.business/', '_blank');
+        });
+    </script>
+</body>
+</html>
