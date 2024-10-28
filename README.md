@@ -74,10 +74,6 @@ A Python application that hosts a web server for continuous barcode scanning usi
 
 ![Mobile Scanner IOS](assets/ios.jpg)
 
-## Screenshot - Mobile Scanning Page ANDROID
-
-![Mobile Scanner ANDROID](assets/android.jpg)
-
 *Images are located in the `assets` folder for this README.*
 
 ---
