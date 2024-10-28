@@ -24,23 +24,16 @@ A Python application that hosts a web server for continuous barcode scanning usi
 
 ### Installation Steps
 
-1. Clone this repository:
-    ```bash
-    git clone https://github.com/your-username/barcode-scanner-host-app.git
-    cd barcode-scanner-host-app
-    ```
+1. Clone or Download this repository:
 
 2. Install dependencies:
-    ```bash
-    python app.py
-    ```
-   *The program will check for required packages (`flask`, `pyautogui`, `pyOpenSSL`, `qrcode`, and `Pillow`) and install them automatically if missing.*
 
-3. Run the application:
-    ```bash
-    python app.py
-    ```
+   The program will check for required packages (`flask`, `pyautogui`, `pyOpenSSL`, `qrcode`, and `Pillow`) and install them automatically if missing.*
 
+4. Run the application:
+    ```bash
+    python Bar-Code-Caster.py
+    ```
    On the first run, SSL certificates will be generated automatically, and the server address and QR code will display in the GUI.
 
 ---
