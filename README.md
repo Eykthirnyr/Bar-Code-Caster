@@ -83,7 +83,7 @@ A Python application that hosts a web server for continuous barcode scanning usi
 - **Permissions**: Ensure `pyautogui` has necessary accessibility permissions, especially on macOS.
 - **Browser Compatibility**: Use Chrome, Safari or Firefox on the scanning device.
 - **Security Warnings**: When accessing from a mobile device, you may need to accept the SSL certificate due to it being self-signed.
-- **Concurrent Scanning: Multiple users can scan barcodes at the same time from different devices, with all data recorded in the same CSV file in real time.
+- **Concurrent Scanning**: Multiple users can scan barcodes at the same time from different devices, with all data recorded in the same CSV file in real time.
 - **Firewall Notice**: When launching the application for the first time, you may see a firewall prompt (e.g., on Windows). Be sure to allow access for the app to function correctly on your network.
 
 ---
