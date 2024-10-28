@@ -88,6 +88,12 @@ A Python application that hosts a web server for continuous barcode scanning usi
 
 ---
 
+## Bar-Code-Caster-Advanced
+
+This Advanced version of the app replaces the previous barcode scanning library, QuaggaJS, with Html5-Qrcode, allowing the app to support a broader range of barcode formats, including QR codes, Data Matrix, Aztec, PDF417, and various 1D barcodes like Code 39 and EAN. Html5-Qrcode offers better compatibility with 2D codes and provides built-in flashlight control on mobile devices, making the app more versatile and user-friendly. Additionally, the app instructions and GUI were updated to reflect these new supported formats and functionalities, enhancing usability for multiple concurrent users with more reliable and diverse scanning capabilities.
+
+---
+
 ## Credits
 
 - **Developed by**: Clément GHANEME
