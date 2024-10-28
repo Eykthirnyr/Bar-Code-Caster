@@ -27,7 +27,7 @@ A Python application that hosts a web server for continuous barcode scanning usi
 
 2. Install dependencies:
 
-   The program will check for required packages (`flask`, `pyautogui`, `pyOpenSSL`, `qrcode`, and `Pillow`) and install them automatically if missing.*
+   The program will check for required packages (`flask`, `pyautogui`, `pyOpenSSL`, `qrcode`, and `Pillow`) and install them automatically.
 
 4. Run the application:
     ```bash
