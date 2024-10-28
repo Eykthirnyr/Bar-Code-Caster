@@ -41,7 +41,7 @@ A Python application that hosts a web server for continuous barcode scanning usi
 
 ### Accessing the Scanner
 
-1. **Server Address and QR Code**: The application GUI shows the server address (e.g., `https://<local-ip>:5000`) and a QR code for easy mobile access.
+1. **Server Address and QR Code**: The application GUI shows the server address (e.g., `https://<local-ip>:5000`) and a QR code.
 2. **Allow Camera Access**: After accessing the page on your mobile device, allow camera access when prompted.
 3. **Align Barcode**: Position the barcode within the camera view to scan. The cooldown timer prevents duplicate scans.
 
