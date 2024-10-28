@@ -8,7 +8,7 @@ A Python application that hosts a web server for continuous barcode scanning usi
 - **Continuous Scanning Mode**: Detects multiple scans without needing page reloads.
 - **Configurable Cooldown Timer**: Prevents duplicate scans by setting a cooldown period.
 - **Output Mode Options**: Choose between keyboard emulation or appending data to a CSV file.
-- **Real-Time Statistics in GUI**: Displays total scans, last scanned code and format, server status, and connected users.
+- **Real-Time Statistics in GUI**: Displays total scans, last scanned and format, status, and connected users.
 - **Self-Signed SSL**: Secure HTTPS connection generated on first use.
 - **QR Code Access**: Easily access the server address via QR code displayed in the GUI.
 - **User-Friendly GUI**: Tkinter-based GUI with QR code, SSL information.
