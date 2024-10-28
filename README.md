@@ -20,11 +20,11 @@ A Python application that hosts a web server for continuous barcode scanning usi
 ### Prerequisites
 
 - Python 3.x
-- Network-connected device for scanning (mobile, tablet, etc.)
+- Network-connected device for scanning on the same network (mobile, tablet, etc.)
 
 ### Installation Steps
 
-1. Clone or Download this repository:
+1. Clone or Download this repository
 
 2. Install dependencies:
 
