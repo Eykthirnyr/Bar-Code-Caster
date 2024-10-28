@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Barcode Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include Html5-Qrcode library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        #scanner-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #reader {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #result {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        #toggleFlash {
+            margin-top: 10px;
+            padding: 15px 30px;
+            font-size: 18px;
+            width: 90%;
+            max-width: 400px;
+        }
+        #footer {
+            margin: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+        #footer button {
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+        #disclaimer {
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 0 10px;
+            text-align: center;
+        }
+    </style>
+    <script>
+        var cooldownTime = {{ cooldown_time }};
+    </script>
+</head>
+<body>
+    <div id="scanner-container">
+        <h1>Scan Barcode</h1>
+        <div id="reader"></div>
+        <div id="result"></div>
+        <button id="toggleFlash">Toggle Flashlight</button>
+        <div id="footer">
+            <button id="madeByButton">Made by Clément GHANEME</button>
+        </div>
+        <div id="disclaimer">
+            The software is provided "as is" and I am not responsible for its usage or any issues arising from using it.
+        </div>
+    </div>
+    <script>
+        let lastScannedCode = null;
+        let lastScannedTime = 0;
+        const cooldownTimeMs = cooldownTime * 1000;
+        let flashOn = false;
+        let html5QrCode;
+
+        function onScanSuccess(decodedText, decodedResult) {
+            const currentTime = new Date().getTime();
+
+            // Check if code is the same as last scanned and within cooldown time
+            if (decodedText === lastScannedCode && (currentTime - lastScannedTime) < cooldownTimeMs) {
+                return; // Skip this detection
+            }
+
+            lastScannedCode = decodedText;
+            lastScannedTime = currentTime;
+
+            console.log(`Barcode detected: ${decodedText}`, decodedResult);
+
+            // Display scanned code and format
+            document.getElementById('result').innerHTML = `Scanned Code: ${decodedText}<br>Format: ${decodedResult.result.format.formatName}`;
+
+            // Send barcode data to server
+            fetch('/scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ barcode: decodedText, format: decodedResult.result.format.formatName }),
+            })
+            .then((response) => {
+                if (response.ok) {
+                    // Clear the result after cooldown
+                    setTimeout(() => {
+                        // Only clear the result if the cooldown has passed
+                        if ((new Date().getTime() - lastScannedTime) >= cooldownTimeMs) {
+                            document.getElementById('result').innerHTML = '';
+                        }
+                    }, cooldownTimeMs);
+                } else {
+                    document.getElementById('result').innerHTML = 'Failed to send barcode.';
+                }
+            });
+        }
+
+        function onScanFailure(error) {
+            // handle scan failure, usually ignore it.
+            // console.warn(`Code scan error = ${error}`);
+        }
+
+        function startScanner() {
+            html5QrCode = new Html5Qrcode("reader");
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.QR_CODE,
+                    Html5QrcodeSupportedFormats.DATA_MATRIX,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.CODE_93,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.ITF,
+                    Html5QrcodeSupportedFormats.AZTEC,
+                    Html5QrcodeSupportedFormats.PDF_417,
+                ],
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
+            };
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                onScanSuccess,
+                onScanFailure
+            ).catch((err) => {
+                console.error('Failed to start QR code scanner.', err);
+            });
+        }
+
+        // Start the scanner
+        startScanner();
+
+        // Send a keep-alive ping to the server every 30 seconds
+        setInterval(function () {
+            fetch('/keepalive', {
+                method: 'POST',
+            });
+        }, 30000);
+
+        // When the user navigates away, send a disconnect message
+        window.addEventListener('beforeunload', function () {
+            navigator.sendBeacon('/disconnect');
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(err => console.error('Failed to stop scanner.', err));
+            }
+        });
+
+        // Flashlight control
+        document.getElementById('toggleFlash').addEventListener('click', function () {
+            if (html5QrCode) {
+                html5QrCode
+                    .turnOnTorch()
+                    .then(() => {
+                        // Torch is on
+                        flashOn = true;
+                        document.getElementById('toggleFlash').innerText = 'Turn Off Flashlight';
+                    })
+                    .catch((err) => {
+                        // Torch could not be turned on
+                        if (flashOn) {
+                            // Try turning off
+                            html5QrCode
+                                .turnOffTorch()
+                                .then(() => {
+                                    flashOn = false;
+                                    document.getElementById('toggleFlash').innerText = 'Toggle Flashlight';
+                                })
+                                .catch((err) => {
+                                    console.error('Error toggling flashlight:', err);
+                                    alert('Unable to toggle flashlight.');
+                                });
+                        } else {
+                            console.error('Error toggling flashlight:', err);
+                            alert('Unable to toggle flashlight.');
+                        }
+                    });
+            } else {
+                alert('Scanner not initialized.');
+            }
+        });
+
+        // "Made by Clément GHANEME" button
+        document.getElementById('madeByButton').addEventListener('click', function () {
+            window.open('https://clement.business/', '_blank');
+        });
+    </script>
+</body>
+</html>
